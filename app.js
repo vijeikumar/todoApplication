@@ -46,7 +46,7 @@ const hasStatusProperty = (requestQuery) => {
 app.get("/todos/", async (request, response) => {
   let data = null;
   let getTodosQuery = "";
-  const { status, search_q = "", priority } = request;
+  const { status, search_q = "", priority } = request.query;
   console.log(status, search_q, priority);
 
   switch (true) {
@@ -66,7 +66,7 @@ app.get("/todos/", async (request, response) => {
         FROM
         todo
         WHERE
-        todo LIKE '%${search_id}%'
+        todo LIKE '%${search_q}%'
         AND status= '${status}'
         AND priority='${priority}';`;
       break;
@@ -77,7 +77,7 @@ app.get("/todos/", async (request, response) => {
         FROM
         todo
         WHERE
-        todo LIKE '%${search_id}%'
+        todo LIKE '%${search_q}%' AND
         AND priority='${priority}';`;
       break;
 
@@ -87,7 +87,7 @@ app.get("/todos/", async (request, response) => {
         FROM
         todo
         WHERE
-        todo LIKE '%${search_id}%'
+        todo LIKE '%${search_q}%'
         AND status='${status}';`;
       break;
     default:
@@ -98,7 +98,7 @@ app.get("/todos/", async (request, response) => {
             WHERE
             todo LIKE '%${search_q}%';`;
   }
-  data = await database.all(getTodosQuery);
+  data = await db.all(getTodosQuery);
   response.send(data);
 });
 
@@ -130,11 +130,11 @@ app.post("/todos/", async (request, response) => {
                 ${id},
                '${todo}',
                '${priority}',
-               '${status}',
+               '${status}'
             );`;
 
   await db.run(addTodoQuery);
-  console.log(createUser);
+  //console.log(createUser);
   response.send("Todo Successfully Added");
 });
 
@@ -164,7 +164,7 @@ app.put("/todos/:todoId/", async (request, response) => {
   WHERE
   id=${todoId};
   `;
-  const previousTodo = await database.get(previousTodoQuery);
+  const previousTodo = await db.get(previousTodoQuery);
 
   const {
     todo = previousTodo.todo,
@@ -177,14 +177,13 @@ app.put("/todos/:todoId/", async (request, response) => {
   todo
   SET 
   todo='${todo}',
-  priority='${priority},
-  status='${status},
+  priority='${priority}',
+  status='${status}'
   WHERE
-  id=${todoId};
-  `;
+  id=${todoId};`;
 
   await db.run(updateTodoQuery);
-  response.send("${updateColumn} Updated");
+  response.send(`${updateColumn} Updated`);
 });
 
 //Delete Todo API-6
